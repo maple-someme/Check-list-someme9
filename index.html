@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>登録前チェックリスト</title>
+    
+    <link rel="apple-touch-icon" href="icon.png">
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f2f2f7;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app-container {
+            background: #ffffff;
+            width: 100%;
+            max-width: 600px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 24px;
+            box-sizing: border-box;
+        }
+        
+        /* タイトル・説明文 */
+        h1 { color: #1e90ff; text-align: center; margin-bottom: 8px; font-size: 24px; }
+        .desc1 { color: #696969; text-align: center; font-size: 15px; font-weight: bold; margin: 0; }
+        .desc2 { color: #a9a9a9; text-align: center; font-size: 11px; margin-top: 5px; margin-bottom: 20px; line-height: 1.4; }
+        .opt-word { color: #ffa500; font-weight: bold; }
+
+        /* 接客タイマー */
+        .timer-container {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+        }
+        .timer-label { font-size: 14px; color: #666; margin-bottom: 4px; }
+        .timer-display { font-size: 28px; font-weight: bold; color: #333; margin-bottom: 12px; }
+        .timer-btns { display: flex; justify-content: center; gap: 10px; }
+        .btn-timer { border: none; padding: 10px 25px; border-radius: 8px; font-size: 16px; font-weight: bold; color: white; cursor: pointer; }
+        .btn-start { background-color: #4682b4; }
+        .btn-stop { background-color: #696969; }
+
+        /* リスト設定 */
+        .section-title { font-size: 16px; font-weight: bold; color: #555; margin-top: 25px; margin-bottom: 10px; border-bottom: 2px solid #f0f0f0; padding-bottom: 5px; }
+        .checklist { display: flex; flex-direction: column; gap: 10px; }
+        .check-item { display: flex; align-items: center; padding: 14px; background: #f8f9fa; border-radius: 10px; font-size: 16px; font-weight: bold; color: #333; }
+        .check-item input { transform: scale(1.6); margin-right: 15px; accent-color: #1e90ff; }
+        
+        /* オプション項目 */
+        .optional { color: #ffa500; }
+        .optional input { accent-color: #ffa500; }
+
+        /* 接客メモ */
+        .memo-container { margin-top: 25px; }
+        .memo-input {
+            width: 100%; height: 100px; padding: 12px; border-radius: 10px; border: 1px solid #d0d0d0;
+            font-size: 16px; box-sizing: border-box; resize: none; font-family: inherit;
+        }
+
+        /* 進捗・ステータス */
+        #status-msg { text-align: center; margin-top: 20px; font-weight: bold; min-height: 24px; }
+        .progress-area { background: #f8f9fa; padding: 15px; border-radius: 12px; margin-top: 10px; }
+        .progress-text { font-size: 14px; font-weight: bold; margin-bottom: 8px; text-align: right; }
+        .progress-bar-bg { width: 100%; background: #e0e0e0; border-radius: 10px; height: 10px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: #1e90ff; width: 0%; transition: width 0.4s ease; }
+
+        /* リセットボタン */
+        .reset-container { margin-top: 30px; text-align: center; }
+        .reset-msg { font-size: 14px; font-weight: bold; margin-bottom: 10px; }
+        .btn-reset { width: 100%; background: #b22222; color: white; border: none; padding: 16px; border-radius: 12px; font-size: 18px; font-weight: bold; }
+
+        /* フッター */
+        .footer { text-align: center; font-size: 10px; color: #bbb; margin-top: 30px; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <h1>登録前チェックリスト</h1>
+    <p class="desc1">ご提案したこと、お伝えしたことに<br>チェックを入れてください</p>
+    <p class="desc2">(<span class="opt-word">オプション項目</span>は必須ではないので<br>チェックしてもしなくても進捗に反映されません。)</p>
+
+    <div class="timer-container">
+        <div class="timer-label">接客時間</div>
+        <div id="time-display" class="timer-display">00:00</div>
+        <div class="timer-btns">
+            <button class="btn-timer btn-start" onclick="startTimer()">開始</button>
+            <button class="btn-timer btn-stop" onclick="stopTimerBtn()">終了</button>
+        </div>
+    </div>
+
+    <div class="section-title">事前確認</div>
+    <div class="checklist">
+        <label class="check-item"><input type="checkbox" class="cb" value="pre1"> GL / インカム報告</label>
+    </div>
+
+    <div class="section-title">必須項目</div>
+    <div class="checklist">
+        <label class="check-item"><input type="checkbox" class="cb req" value="r1"> キャッシュカード/クレジットカードの所持</label>
+        <label class="check-item"><input type="checkbox" class="cb req" value="r2"> 身分証明書の所持</label>
+        <label class="check-item"><input type="checkbox" class="cb req" value="r3"> メール持ち運びの有無</label>
+        <label class="check-item"><input type="checkbox" class="cb req" value="r4"> 頭金の説明</label>
+        <label class="check-item"><input type="checkbox" class="cb req" value="r5"> 事務手数料の説明</label>
+        <label class="check-item"><input type="checkbox" class="cb req" value="r6"> データ移行のご提案</label>
+        <label class="check-item"><input type="checkbox" class="cb req" value="r7"> ノジマ補償のご提案</label>
+        <label class="check-item"><input type="checkbox" class="cb req" value="r8"> 同意書登録</label>
+    </div>
+
+    <div class="section-title">【オプション】</div>
+    <div class="checklist">
+        <label class="check-item optional"><input type="checkbox" class="cb" value="o1"> ノートンのご提案</label>
+        <label class="check-item optional"><input type="checkbox" class="cb" value="o2"> でんきのご提案</label>
+    </div>
+
+    <div class="memo-container">
+        <textarea id="memo" class="memo-input" placeholder="メモしたいことを入力してください"></textarea>
+    </div>
+
+    <div id="status-msg"></div>
+    <div class="progress-area">
+        <div class="progress-text">進捗: <span id="percent">0</span>%</div>
+        <div class="progress-bar-bg"><div id="bar" class="progress-bar-fill"></div></div>
+    </div>
+
+    <div class="reset-container">
+        <p class="reset-msg">使い終わったらリセットボタンを押してください</p>
+        <button class="btn-reset" onclick="manualReset()">一括リセット</button>
+    </div>
+
+    <div class="footer">染谷作成</div>
+</div>
+
+<script>
+    let timer = null;
+    let seconds = 0;
+
+    function startTimer() {
+        if (timer) return;
+        timer = setInterval(() => {
+            seconds++;
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            document.getElementById('time-display').innerText = `${m}:${s}`;
+        }, 1000);
+    }
+
+    function stopTimerBtn() {
+        clearInterval(timer);
+        timer = null;
+        if (confirm("お疲れ様でした！チェックもリセットしますか？")) {
+            resetAllData();
+        }
+    }
+
+    function updateProgress() {
+        const reqs = document.querySelectorAll('.req');
+        const checked = document.querySelectorAll('.req:checked').length;
+        const percent = Math.floor((checked / reqs.length) * 100);
+        
+        document.getElementById('percent').innerText = percent;
+        document.getElementById('bar').style.width = percent + '%';
+
+        const msg = document.getElementById('status-msg');
+        if (checked === 0) {
+            msg.innerText = "";
+        } else if (checked < reqs.length) {
+            msg.innerText = "チェック漏れがあります。確認してください";
+            msg.style.color = "#b22222";
+        } else {
+            msg.innerText = "全てチェック済です。お疲れ様でした。";
+            msg.style.color = "#4682b4";
+        }
+    }
+
+    function resetAllData() {
+        document.querySelectorAll('.cb').forEach(cb => {
+            cb.checked = false;
+            localStorage.removeItem(cb.value);
+        });
+        document.getElementById('memo').value = "";
+        localStorage.removeItem('memo_data');
+        seconds = 0;
+        document.getElementById('time-display').innerText = "00:00";
+        clearInterval(timer);
+        timer = null;
+        updateProgress();
+        window.scrollTo(0,0);
+    }
+
+    // 修正箇所：手動一括リセット時のポップアップ文言
+    function manualReset() {
+        if(confirm("お疲れ様でした。全てリセットして次の接客の準備をしますか？")) {
+            resetAllData();
+        }
+    }
+
+    window.onload = () => {
+        document.querySelectorAll('.cb').forEach(cb => {
+            if (localStorage.getItem(cb.value) === 'true') cb.checked = true;
+            cb.addEventListener('change', () => {
+                localStorage.setItem(cb.value, cb.checked);
+                updateProgress();
+            });
+        });
+        const m = document.getElementById('memo');
+        m.value = localStorage.getItem('memo_data') || "";
+        m.addEventListener('input', () => localStorage.setItem('memo_data', m.value));
+        updateProgress();
+    };
+</script>
+</body>
+</html>
