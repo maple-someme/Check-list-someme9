@@ -217,13 +217,42 @@
     const btnStart = document.getElementById('btn-start');
     const timeDisplay = document.getElementById('time-display');
 
-    // ▼ カナ入力の強制制御 ▼
-    nameInput.addEventListener('input', function() {
-        let val = this.value.replace(/[\u3041-\u3096]/g, match => String.fromCharCode(match.charCodeAt(0) + 0x60));
-        val = val.replace(/[^ァ-ヶー]/g, '');
-        this.value = val;
-        saveData();
+    // ▼ カナ入力の強制制御（変換中対応版） ▼
+    let isComposing = false;
+
+    // 日本語入力（変換）の開始
+    nameInput.addEventListener('compositionstart', function() {
+        isComposing = true;
     });
+
+    // 日本語入力（変換）の確定
+    nameInput.addEventListener('compositionend', function() {
+        isComposing = false;
+        formatToKatakana(this);
+    });
+
+    // 通常の入力（ペーストや英数字など）
+    nameInput.addEventListener('input', function() {
+        if (!isComposing) {
+            formatToKatakana(this);
+        } else {
+            // 変換中も名前を一時保存してタブに反映させる
+            saveData();
+        }
+    });
+
+    // カタカナ以外を排除する関数
+    function formatToKatakana(element) {
+        let val = element.value.replace(/[\u3041-\u3096]/g, match => String.fromCharCode(match.charCodeAt(0) + 0x60));
+        val = val.replace(/[^ァ-ヶー]/g, '');
+        
+        // 無駄なカーソル飛びを防ぐため、値が変わった時だけ更新
+        if (element.value !== val) {
+            element.value = val;
+        }
+        saveData();
+    }
+    // ▲ ここまで変更 ▲
 
     function saveData() {
         let c = customers[currentTab];
@@ -317,17 +346,11 @@
     }
 
     function resetCurrentData() {
-        // データを初期化
         customers[currentTab] = { name: "", timerActive: false, seconds: 0, checks: {}, memo: "" };
-        
-        // 画面の入力欄を明示的に空にする
         nameInput.value = "";
         memoInput.value = "";
-        
-        // ★修正箇所★：チェックボックスも明示的に全部外す
         allCheckboxes.forEach(cb => cb.checked = false);
         
-        // 保存して再描画
         saveData();
         renderTab();
         window.scrollTo(0,0);
