@@ -301,7 +301,7 @@
         c.timerActive = false;
         saveData();
         renderTab();
-        if (confirm("お疲れ様でした！チェックもリセットしますか？")) {
+        if (confirm("お疲れ様でした！全てリセットしますか？")) {
             resetCurrentData();
         }
     };
@@ -319,7 +319,14 @@
     }
 
     function resetCurrentData() {
+        // データを初期化
         customers[currentTab] = { name: "", timerActive: false, seconds: 0, checks: {}, memo: "" };
+        
+        // 画面の入力欄を明示的に空にする
+        nameInput.value = "";
+        memoInput.value = "";
+        
+        // 保存して再描画
         saveData();
         renderTab();
         window.scrollTo(0,0);
