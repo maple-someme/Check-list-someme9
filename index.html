@@ -219,9 +219,7 @@
 
     // ▼ カナ入力の強制制御 ▼
     nameInput.addEventListener('input', function() {
-        // 入力された瞬間に「ひらがな」を「カタカナ」に置換
         let val = this.value.replace(/[\u3041-\u3096]/g, match => String.fromCharCode(match.charCodeAt(0) + 0x60));
-        // カタカナ・長音（ー）以外をすべて即座に消去
         val = val.replace(/[^ァ-ヶー]/g, '');
         this.value = val;
         saveData();
@@ -325,6 +323,9 @@
         // 画面の入力欄を明示的に空にする
         nameInput.value = "";
         memoInput.value = "";
+        
+        // ★修正箇所★：チェックボックスも明示的に全部外す
+        allCheckboxes.forEach(cb => cb.checked = false);
         
         // 保存して再描画
         saveData();
