@@ -29,8 +29,13 @@
         
         h1 { color: #1e90ff; text-align: center; margin-bottom: 8px; font-size: 24px; }
         .desc1 { color: #696969; text-align: center; font-size: 15px; font-weight: bold; margin: 0; }
+        
+        /* 赤字の注意書き */
+        .warning-text { color: #e60000; text-align: center; font-size: 13px; font-weight: bold; margin: 12px 0; line-height: 1.5; }
+        
         .desc2 { color: #a9a9a9; text-align: center; font-size: 11px; margin-top: 5px; margin-bottom: 20px; line-height: 1.4; }
         .opt-word { color: #ffa500; font-weight: bold; }
+        .split-word { color: #4682b4; font-weight: bold; }
 
         /* タブUI */
         .tabs {
@@ -102,11 +107,16 @@
         .btn-start { background-color: #4682b4; }
         .btn-stop { background-color: #696969; }
 
-        /* リスト */
+        /* リスト共通設定 */
         .section-title { font-size: 16px; font-weight: bold; color: #555; margin-top: 25px; margin-bottom: 10px; border-bottom: 2px solid #f0f0f0; padding-bottom: 5px; }
         .checklist { display: flex; flex-direction: column; gap: 10px; }
         .check-item { display: flex; align-items: center; padding: 14px; background: #f8f9fa; border-radius: 10px; font-size: 16px; font-weight: bold; color: #333; }
         .check-item input { transform: scale(1.6); margin-right: 15px; accent-color: #1e90ff; }
+        
+        /* 分割リセット項目の文字色とチェックボックス色 */
+        .split-item { color: #4682b4 !important; }
+        .split-item input { accent-color: #4682b4 !important; }
+        
         .optional { color: #ffa500; }
         .optional input { accent-color: #ffa500; }
 
@@ -137,7 +147,13 @@
 <div class="app-container">
     <h1>登録前チェックリスト</h1>
     <p class="desc1">ご提案したこと、お伝えしたことに<br>チェックを入れてください</p>
-    <p class="desc2">(<span class="opt-word">オプション項目</span>は必須ではないので<br>チェックしてもしなくても進捗に反映されません。)</p>
+    
+    <p class="warning-text">
+        ミス防止のため、全てのチェックが終わってから<br>
+        登録をはじめましょう
+    </p>
+
+    <p class="desc2">(<span class="opt-word">オプション項目</span>と<span class="split-word">分割リセット項目</span>は必須ではないので<br>チェックしてもしなくても進捗には反映されません)</p>
 
     <div class="tabs">
         <div class="tab active" onclick="switchTab(0)" id="tab-btn-0">お客様 1</div>
@@ -164,7 +180,7 @@
         <label class="check-item"><input type="checkbox" class="cb" value="pre1"> GL / インカム報告</label>
     </div>
 
-    <div class="section-title">必須項目</div>
+    <div class="section-title">登録前必須項目</div>
     <div class="checklist">
         <label class="check-item"><input type="checkbox" class="cb req" value="r1"> キャッシュカード/クレジットカードの所持</label>
         <label class="check-item"><input type="checkbox" class="cb req" value="r2"> 身分証明書の所持</label>
@@ -174,11 +190,17 @@
         <label class="check-item"><input type="checkbox" class="cb req" value="r6"> データ移行のご提案</label>
         <label class="check-item"><input type="checkbox" class="cb req" value="r7"> 補償のご提案</label>
         <label class="check-item"><input type="checkbox" class="cb req" value="r8"> 同意書登録</label>
+        <label class="check-item"><input type="checkbox" class="cb req" value="r9"> ノートンのご提案</label>
+    </div>
+
+    <div class="section-title">分割リセット項目</div>
+    <div class="checklist">
+        <label class="check-item split-item"><input type="checkbox" class="cb" value="s1"> 分割リセット審査完了</label>
+        <label class="check-item split-item"><input type="checkbox" class="cb" value="s2"> 分割リセット口座登録</label>
     </div>
 
     <div class="section-title">【オプション】</div>
     <div class="checklist">
-        <label class="check-item optional"><input type="checkbox" class="cb" value="o1"> ノートンのご提案</label>
         <label class="check-item optional"><input type="checkbox" class="cb" value="o2"> でんきのご提案</label>
     </div>
 
@@ -217,42 +239,23 @@
     const btnStart = document.getElementById('btn-start');
     const timeDisplay = document.getElementById('time-display');
 
-    // ▼ カナ入力の強制制御（変換中対応版） ▼
     let isComposing = false;
-
-    // 日本語入力（変換）の開始
-    nameInput.addEventListener('compositionstart', function() {
-        isComposing = true;
-    });
-
-    // 日本語入力（変換）の確定
+    nameInput.addEventListener('compositionstart', () => isComposing = true);
     nameInput.addEventListener('compositionend', function() {
         isComposing = false;
         formatToKatakana(this);
     });
-
-    // 通常の入力（ペーストや英数字など）
     nameInput.addEventListener('input', function() {
-        if (!isComposing) {
-            formatToKatakana(this);
-        } else {
-            // 変換中も名前を一時保存してタブに反映させる
-            saveData();
-        }
+        if (!isComposing) formatToKatakana(this);
+        else saveData();
     });
 
-    // カタカナ以外を排除する関数
     function formatToKatakana(element) {
         let val = element.value.replace(/[\u3041-\u3096]/g, match => String.fromCharCode(match.charCodeAt(0) + 0x60));
         val = val.replace(/[^ァ-ヶー]/g, '');
-        
-        // 無駄なカーソル飛びを防ぐため、値が変わった時だけ更新
-        if (element.value !== val) {
-            element.value = val;
-        }
+        if (element.value !== val) element.value = val;
         saveData();
     }
-    // ▲ ここまで変更 ▲
 
     function saveData() {
         let c = customers[currentTab];
@@ -279,7 +282,7 @@
         updateTabNames();
     }
 
-    window.switchTab = function(index) {
+    window.switchTab = (index) => {
         saveData();
         currentTab = index;
         renderTab();
@@ -300,9 +303,7 @@
 
     setInterval(() => {
         let needsSave = false;
-        customers.forEach(c => {
-            if (c.timerActive) { c.seconds++; needsSave = true; }
-        });
+        customers.forEach(c => { if (c.timerActive) { c.seconds++; needsSave = true; } });
         if (needsSave) {
             updateTimeDisplay(customers[currentTab].seconds);
             localStorage.setItem('someya_multi_app', JSON.stringify(customers));
@@ -315,7 +316,7 @@
         timeDisplay.innerText = `${m}:${s}`;
     }
 
-    window.toggleTimer = function(forceStart = false) {
+    window.toggleTimer = (forceStart = false) => {
         let c = customers[currentTab];
         if (forceStart && c.timerActive) return;
         c.timerActive = forceStart;
@@ -323,14 +324,12 @@
         renderTab();
     };
 
-    window.stopTimerBtn = function() {
+    window.stopTimerBtn = () => {
         let c = customers[currentTab];
         c.timerActive = false;
         saveData();
         renderTab();
-        if (confirm("お疲れ様でした！全てリセットしますか？")) {
-            resetCurrentData();
-        }
+        if (confirm("お疲れ様でした！全てリセットしますか？")) resetCurrentData();
     };
 
     function updateProgress() {
@@ -340,7 +339,7 @@
         document.getElementById('percent').innerText = percent;
         document.getElementById('bar').style.width = percent + '%';
         const msg = document.getElementById('status-msg');
-        if (checked === 0) { msg.innerText = ""; }
+        if (checked === 0) msg.innerText = "";
         else if (checked < reqs.length) { msg.innerText = "チェック漏れがあります。確認してください"; msg.style.color = "#b22222"; }
         else { msg.innerText = "全てチェック済です。お疲れ様でした。"; msg.style.color = "#4682b4"; }
     }
@@ -350,19 +349,16 @@
         nameInput.value = "";
         memoInput.value = "";
         allCheckboxes.forEach(cb => cb.checked = false);
-        
         saveData();
         renderTab();
         window.scrollTo(0,0);
     }
 
-    window.manualReset = function() {
-        if(confirm("お疲れ様でした。全てリセットして次の接客の準備をしますか？\n（現在開いているお客様のデータのみ消去されます）")) {
-            resetCurrentData();
-        }
+    window.manualReset = () => {
+        if(confirm("お疲れ様でした。全てリセットして次の接客の準備をしますか？\n（現在開いているお客様のデータのみ消去されます）")) resetCurrentData();
     };
 
-    window.onload = () => { renderTab(); };
+    window.onload = () => renderTab();
 </script>
 </body>
 </html>
