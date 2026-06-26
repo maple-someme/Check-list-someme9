@@ -113,12 +113,63 @@
         .check-item { display: flex; align-items: center; padding: 14px; background: #f8f9fa; border-radius: 10px; font-size: 16px; font-weight: bold; color: #333; }
         .check-item input { transform: scale(1.6); margin-right: 15px; accent-color: #1e90ff; }
         
-        /* 分割リセット項目の文字色とチェックボックス色 */
         .split-item { color: #4682b4 !important; }
         .split-item input { accent-color: #4682b4 !important; }
         
+        /* BB項目の文字色とチェックボックス色 */
+        .bb-item { color: #3cb371 !important; }
+        .bb-item input { accent-color: #3cb371 !important; }
+        
         .optional { color: #ffa500; }
         .optional input { accent-color: #ffa500; }
+
+        /* 横並び選択ボタングループ（補償・データ移行） */
+        .decision-group {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .decision-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .radio-row {
+            display: flex;
+            flex-wrap: wrap; /* 複数行に折り返すように追加 */
+            gap: 6px; /* 隙間を調整 */
+        }
+        .radio-label {
+            flex: 1 1 30%; /* 1行に3つ入るように調整 */
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .radio-label input {
+            display: none; /* デフォルトの丸/四角ボタンを隠す */
+        }
+        .radio-label span {
+            display: block;
+            padding: 10px 2px; 
+            background: #ffffff;
+            border: 2px solid #d0d0d0;
+            border-radius: 8px;
+            font-size: 11px; 
+            font-weight: bold;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        /* 選択された時のデザイン（ラジオボタン・チェックボックス共通） */
+        .radio-label input:checked + span {
+            background: #1e90ff;
+            border-color: #1e90ff;
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(30, 144, 255, 0.3);
+        }
 
         /* メモ */
         .memo-container { margin-top: 25px; }
@@ -178,6 +229,7 @@
     <div class="section-title">事前確認</div>
     <div class="checklist">
         <label class="check-item"><input type="checkbox" class="cb" value="pre1"> GL / インカム報告</label>
+        <label class="check-item"><input type="checkbox" class="cb" value="pre2"> モバイル会員読取</label>
     </div>
 
     <div class="section-title">登録前必須項目</div>
@@ -191,6 +243,8 @@
         <label class="check-item"><input type="checkbox" class="cb req" value="r7"> 補償のご提案</label>
         <label class="check-item"><input type="checkbox" class="cb req" value="r8"> 同意書登録</label>
         <label class="check-item"><input type="checkbox" class="cb req" value="r9"> ノートンのご提案</label>
+        <label class="check-item bb-item"><input type="checkbox" class="cb req" value="b1"> ラック検索</label>
+        <label class="check-item bb-item"><input type="checkbox" class="cb req" value="b2"> BBのご提案</label>
     </div>
 
     <div class="section-title">分割リセット項目</div>
@@ -200,8 +254,31 @@
     </div>
 
     <div class="section-title">【オプション】</div>
-    <div class="checklist">
+    <div class="checklist" style="margin-bottom: 20px;">
         <label class="check-item optional"><input type="checkbox" class="cb" value="o2"> でんきのご提案</label>
+    </div>
+
+    <div class="section-title" style="margin-top: 10px;">補償･データ移行内容(進捗対象外)</div>
+    
+    <div class="decision-group">
+        <div class="decision-title">補償プラン（複数選択可）</div>
+        <div class="radio-row">
+            <label class="radio-label"><input type="checkbox" class="cb" value="w_lump_sum"><span>補償(一括)</span></label>
+            <label class="radio-label"><input type="checkbox" class="cb" value="w_monthly"><span>補償(月額)</span></label>
+            <label class="radio-label"><input type="checkbox" class="cb" value="w_carrier"><span>キャリア補償</span></label>
+            <label class="radio-label"><input type="checkbox" class="cb" value="w_battery"><span>バッテリー補償</span></label>
+            <label class="radio-label"><input type="checkbox" class="cb" value="w_marutto"><span>まるっとパック</span></label>
+            <label class="radio-label"><input type="checkbox" class="cb" value="w_none"><span>補償なし</span></label>
+        </div>
+    </div>
+
+    <div class="decision-group">
+        <div class="decision-title">データ移行</div>
+        <div class="radio-row">
+            <label class="radio-label"><input type="radio" class="rb" name="data_transfer" value="full"><span>完全移行</span></label>
+            <label class="radio-label"><input type="radio" class="rb" name="data_transfer" value="pack"><span>安心パック内</span></label>
+            <label class="radio-label"><input type="radio" class="rb" name="data_transfer" value="none"><span>移行なし</span></label>
+        </div>
     </div>
 
     <div class="memo-container">
@@ -219,23 +296,29 @@
         <button class="btn-reset" onclick="manualReset()">一括リセット</button>
     </div>
 
-    <div class="footer">染谷作成</div>
+    <div class="footer">染谷作成 更新日2026.06.26</div>
 </div>
 
 <script>
     let currentTab = 0;
     let customers = [
-        { name: "", timerActive: false, seconds: 0, checks: {}, memo: "" },
-        { name: "", timerActive: false, seconds: 0, checks: {}, memo: "" },
-        { name: "", timerActive: false, seconds: 0, checks: {}, memo: "" }
+        { name: "", timerActive: false, seconds: 0, checks: {}, radios: {}, memo: "" },
+        { name: "", timerActive: false, seconds: 0, checks: {}, radios: {}, memo: "" },
+        { name: "", timerActive: false, seconds: 0, checks: {}, radios: {}, memo: "" }
     ];
 
     const savedData = localStorage.getItem('someya_multi_app');
-    if (savedData) { customers = JSON.parse(savedData); }
+    if (savedData) { 
+        customers = JSON.parse(savedData); 
+        customers.forEach(c => {
+            if (!c.radios) c.radios = {};
+        });
+    }
 
     const nameInput = document.getElementById('customer-name');
     const memoInput = document.getElementById('memo');
     const allCheckboxes = document.querySelectorAll('.cb');
+    const allRadios = document.querySelectorAll('.rb'); 
     const btnStart = document.getElementById('btn-start');
     const timeDisplay = document.getElementById('time-display');
 
@@ -261,7 +344,14 @@
         let c = customers[currentTab];
         c.name = nameInput.value;
         c.memo = memoInput.value;
+        
         allCheckboxes.forEach(cb => { c.checks[cb.value] = cb.checked; });
+        
+        c.radios = {};
+        document.querySelectorAll('.rb:checked').forEach(rb => {
+            c.radios[rb.name] = rb.value;
+        });
+
         localStorage.setItem('someya_multi_app', JSON.stringify(customers));
         updateTabNames();
     }
@@ -270,7 +360,13 @@
         let c = customers[currentTab];
         nameInput.value = c.name;
         memoInput.value = c.memo;
+        
         allCheckboxes.forEach(cb => { cb.checked = !!c.checks[cb.value]; });
+        
+        allRadios.forEach(rb => {
+            rb.checked = (c.radios && c.radios[rb.name] === rb.value);
+        });
+
         for (let i = 0; i < 3; i++) {
             const t = document.getElementById('tab-btn-' + i);
             t.className = i === currentTab ? 'tab active' : 'tab';
@@ -299,6 +395,9 @@
     memoInput.addEventListener('input', saveData);
     allCheckboxes.forEach(cb => {
         cb.addEventListener('change', () => { saveData(); updateProgress(); });
+    });
+    allRadios.forEach(rb => {
+        rb.addEventListener('change', () => { saveData(); });
     });
 
     setInterval(() => {
@@ -345,10 +444,11 @@
     }
 
     function resetCurrentData() {
-        customers[currentTab] = { name: "", timerActive: false, seconds: 0, checks: {}, memo: "" };
+        customers[currentTab] = { name: "", timerActive: false, seconds: 0, checks: {}, radios: {}, memo: "" };
         nameInput.value = "";
         memoInput.value = "";
         allCheckboxes.forEach(cb => cb.checked = false);
+        allRadios.forEach(rb => rb.checked = false);
         saveData();
         renderTab();
         window.scrollTo(0,0);
